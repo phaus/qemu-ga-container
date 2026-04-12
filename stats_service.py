@@ -70,7 +70,9 @@ class StatsHandler(BaseHTTPRequestHandler):
             self.send_error(404, "File Not Found")
 
 
-def run(server_class=HTTPServer, handler_class=StatsHandler, port=8080):
+def run(server_class=HTTPServer, handler_class=StatsHandler, port=None):
+    if port is None:
+        port = int(os.environ.get("STATS_PORT", 8080))
     server_address = ("", port)
     httpd = server_class(server_address, handler_class)
     print(f"Starting stats server on port {port}...")

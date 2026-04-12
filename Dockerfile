@@ -1,5 +1,8 @@
 FROM alpine:3.23
 LABEL maintainer="dskadra@gmail.com"
+LABEL maintainer="philipp@haussleiter.de"
+
+ENV STATS_PORT=8080
 
 RUN apk add --update --no-cache qemu-guest-agent python3
 
