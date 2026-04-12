@@ -26,14 +26,16 @@ jobs:
           sudo mknod /dev/virtio-ports/org.qemu.guest_agent.0 c 10 234
           
           # Run the container in the background
+          # We use --network host to ensure the service is reachable on localhost in the runner
           docker run -d \
             --name test-container \
+            --network host \
             --device /dev/virtio-ports/org.qemu.guest_agent.0:/dev/virtio-ports/org.qemu.guest_agent.0 \
-            -p 8080:8080 \
             qemu-ga-test
           
-          # Wait for service to start
-          sleep 10
+          # Wait for service to start and check if the port is open
+          echo "Waiting for service to start..."
+          timeout 30s bash -c 'until curl -s http://localhost:8080; do sleep 1; done' || (echo "Service failed to start" && docker logs test-container && exit 1)
           
           # Test JSON endpoint
           echo "Testing JSON endpoint..."
