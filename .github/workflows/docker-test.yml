@@ -23,10 +23,14 @@ jobs:
         run: |
           # Create a dummy device to satisfy the qemu-ga requirement during testing
           sudo mkdir -p /dev/virtio-ports/
-          sudo mknod /dev/virtio-ports/org.qemu.guest_agent.0 c 10:234
+          sudo mknod /dev/virtio-ports/org.qemu.guest_agent.0 c 10 234
           
           # Run the container in the background
-          docker run -d             --name test-container             --device /dev/virtio-ports/org.qemu.guest_agent.0:/dev/virtio-ports/org.qemu.guest_agent.0             -p 8080:8080             qemu-ga-test
+          docker run -d \
+            --name test-container \
+            --device /dev/virtio-ports/org.qemu.guest_agent.0:/dev/virtio-ports/org.qemu.guest_agent.0 \
+            -p 8080:8080 \
+            qemu-ga-test
           
           # Wait for service to start
           sleep 10
@@ -37,7 +41,7 @@ jobs:
           
           # Test HTML endpoint
           echo "Testing HTML endpoint..."
-          curl -f http://localhost:8080/ | grep -q "<h1>" || exit 1
+          curl -f http://localhost:8080/ | grep -q "<h1" || exit 1
           
           echo "All tests passed!"
           
