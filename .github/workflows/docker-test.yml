@@ -1,0 +1,46 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ feature/qemu-stats-service ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t qemu-ga-test .
+
+      - name: Run container with mocked device
+        run: |
+          # Create a dummy device to satisfy the qemu-ga requirement during testing
+          sudo mkdir -p /dev/virtio-ports/
+          sudo mknod /dev/virtio-ports/org.qemu.guest_agent.0 c 10:234
+          
+          # Run the container in the background
+          docker run -d             --name test-container             --device /dev/virtio-ports/org.qemu.guest_agent.0:/dev/virtio-ports/org.qemu.guest_agent.0             -p 8080:8080             qemu-ga-test
+          
+          # Wait for service to start
+          sleep 10
+          
+          # Test JSON endpoint
+          echo "Testing JSON endpoint..."
+          curl -f http://localhost:8080/api/stats || exit 1
+          
+          # Test HTML endpoint
+          echo "Testing HTML endpoint..."
+          curl -f http://localhost:8080/ | grep -q "<h1>" || exit 1
+          
+          echo "All tests passed!"
+          
+          # Cleanup
+          docker stop test-container
+          docker rm test-container
