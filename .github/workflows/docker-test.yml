@@ -40,7 +40,11 @@ jobs:
           # Test JSON endpoint
           echo "Testing JSON endpoint..."
           curl -f http://localhost:8080/api/stats || exit 1
-          
+
+          # Test health endpoint
+          echo "Testing health endpoint..."
+          curl -f http://localhost:8080/api/health | grep -q "ok" || exit 1
+
           # Test HTML endpoint
           echo "Testing HTML endpoint..."
           curl -f http://localhost:8080/ | grep -q "<h1" || exit 1
