@@ -1,4 +1,4 @@
-FROM alpine:3.23
+FROM alpine:3.24
 LABEL maintainer="dskadra@gmail.com"
 LABEL maintainer="philipp@haussleiter.de"
 
